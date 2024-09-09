@@ -31,5 +31,7 @@ https://gluonhq.com/products/javafx/
 
 Powershell (x86):
 PS D:\PenTesting\Code> cd D:\PenTesting\Code\
+
 PS D:\PenTesting\Code> set PATH_TO_FX 'C:\Program Files\Java\jdk-22\javafx-sdk-22.0.2\lib'
+
 PS D:\PenTesting\Code> java --module-path $PATH_TO_FX --add-modules javafx.controls ArmyQuiz
