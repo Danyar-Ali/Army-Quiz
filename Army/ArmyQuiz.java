@@ -1,4 +1,3 @@
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,6 +37,9 @@ public class ArmyQuiz extends Application {
     private List<Boolean> correctnessList = new ArrayList<>();
     private int highestRecord = 0;
 
+    // New list to store incorrect answers
+    private List<IncorrectAnswer> incorrectAnswers = new ArrayList<>();
+
     @Override
     public void start(Stage stage) {
         this.mainStage = stage;
@@ -75,6 +77,7 @@ public class ArmyQuiz extends Application {
         questionsList.clear();
         userResponses.clear();
         correctnessList.clear();
+        incorrectAnswers.clear(); // Clear previous incorrect answers
 
         BorderPane quizPane = new BorderPane();
         quizPane.setPadding(new Insets(20));
@@ -153,7 +156,7 @@ public class ArmyQuiz extends Application {
         } else if (quizStep == 3) {
             Label choicePrompt = new Label("Which result was greater?");
             choicePrompt.setFont(new Font("Verdana", 24));
-            choicePrompt.setTextFill(Color.BLUE);   
+            choicePrompt.setTextFill(Color.BLUE);
 
             Button topButton = new Button("EQ 1");
             Button bottomButton = new Button("EQ 2");
@@ -193,6 +196,8 @@ public class ArmyQuiz extends Application {
                 if (Math.abs(tempResult1 - tempResult2) <= ANSWER_DIFFERENCE_LIMIT && tempResult1 != tempResult2) {
                     currentQuestion1 = num1 + " + " + num2;
                     currentQuestion2 = num3 + " + " + num4;
+                    result1 = tempResult1;
+                    result2 = tempResult2;
                     valid = true;
                 }
             } else if (questionType < 4) {  // Subtraction
@@ -207,6 +212,8 @@ public class ArmyQuiz extends Application {
                 if (Math.abs(tempResult1 - tempResult2) <= ANSWER_DIFFERENCE_LIMIT && tempResult1 != tempResult2) {
                     currentQuestion1 = num1 + " - " + num2;
                     currentQuestion2 = num3 + " - " + num4;
+                    result1 = tempResult1;
+                    result2 = tempResult2;
                     valid = true;
                 }
             } else if (questionType < 7) {  // Multiplication (30%)
@@ -221,6 +228,8 @@ public class ArmyQuiz extends Application {
                 if (Math.abs(tempResult1 - tempResult2) <= ANSWER_DIFFERENCE_LIMIT) {
                     currentQuestion1 = num1 + " * " + num2;
                     currentQuestion2 = num3 + " * " + num4;
+                    result1 = tempResult1;
+                    result2 = tempResult2;
                     valid = true;
                 }
             } else {  // Division (30%)
@@ -237,6 +246,8 @@ public class ArmyQuiz extends Application {
                         && tempResult1 != tempResult2) {
                     currentQuestion1 = num1 + " / " + num2;
                     currentQuestion2 = num3 + " / " + num4;
+                    result1 = tempResult1;
+                    result2 = tempResult2;
                     valid = true;
                 }
             }
@@ -245,75 +256,173 @@ public class ArmyQuiz extends Application {
 
     private void checkAnswer(int chosenEquation) {
         totalQuestions++;
+
         boolean isCorrect = false;
-
-        int answer1 = calculateAnswer(currentQuestion1);
-        int answer2 = calculateAnswer(currentQuestion2);
-
-        if (chosenEquation == 1) {
-            isCorrect = answer1 > answer2;
-        } else if (chosenEquation == 2) {
-            isCorrect = answer2 > answer1;
-        } else if (chosenEquation == 0) {
-            isCorrect = answer1 == answer2;
+        if (chosenEquation == 1 && result1 > result2) {
+            correctAnswers++;
+            isCorrect = true;
+        } else if (chosenEquation == 2 && result2 > result1) {
+            correctAnswers++;
+            isCorrect = true;
+        } else if (chosenEquation == 0 && result1 == result2) {
+            correctAnswers++;
+            isCorrect = true;
         }
 
+        // Record whether the answer was correct or not
         correctnessList.add(isCorrect);
         userResponses.add(chosenEquation);
 
-        if (isCorrect) {
-            correctAnswers++;
+        // If incorrect, record the details for review
+        if (!isCorrect) {
+            incorrectAnswers.add(new IncorrectAnswer(currentQuestion1, currentQuestion2, chosenEquation, result1, result2));
         }
 
-        quizStep = 1; // Return to step 1 to generate new questions
+        // Continue to the next question
+        quizStep = 1;
         updatePageContent((BorderPane) mainStage.getScene().getRoot());
     }
 
-    private int calculateAnswer(String question) {
-        String[] parts = question.split(" ");
-        int num1 = Integer.parseInt(parts[0]);
-        int num2 = Integer.parseInt(parts[2]);
-        switch (parts[1]) {
-            case "+":
-                return num1 + num2;
-            case "-":
-                return num1 - num2;
-            case "*":
-                return num1 * num2;
-            case "/":
-                return num1 / num2;
-            default:
-                throw new IllegalArgumentException("Invalid operator");
+    private void endQuiz() {
+        BorderPane resultsPane = new BorderPane();
+        resultsPane.setPadding(new Insets(20));
+
+        VBox resultContent = new VBox(20);
+        resultContent.setAlignment(Pos.CENTER);
+
+        Label resultLabel = new Label("Quiz Finished!");
+        resultLabel.setFont(new Font("Verdana", 30));
+        resultLabel.setTextFill(Color.BLUE);
+        resultContent.getChildren().add(resultLabel);
+
+        Label scoreLabel = new Label("Your score: " + correctAnswers + " / " + totalQuestions);
+        scoreLabel.setFont(new Font("Verdana", 24));
+        scoreLabel.setTextFill(Color.GREEN);
+        resultContent.getChildren().add(scoreLabel);
+
+        if (correctAnswers > highestRecord) {
+            highestRecord = correctAnswers;
+        }
+        Label recordLabel = new Label("Your highest score: " + highestRecord);
+        recordLabel.setFont(new Font("Verdana", 20));
+        resultContent.getChildren().add(recordLabel);
+
+        Button reviewButton = new Button("Review Incorrect Answers");
+        reviewButton.setFont(new Font("Verdana", 18));
+        reviewButton.setTextFill(Color.WHITE);
+        reviewButton.setStyle("-fx-background-color: blue;");
+        reviewButton.setOnAction(e -> showReviewPage());
+        resultContent.getChildren().add(reviewButton);
+
+        Button retryButton = new Button("Retry Quiz");
+        retryButton.setFont(new Font("Verdana", 18));
+        retryButton.setTextFill(Color.WHITE);
+        retryButton.setStyle("-fx-background-color: green;");
+        retryButton.setOnAction(e -> startQuiz());
+        resultContent.getChildren().add(retryButton);
+
+        resultsPane.setCenter(resultContent);
+        Scene resultScene = new Scene(resultsPane, 600, 400);
+        mainStage.setScene(resultScene);
+    }
+
+    // Show review page with incorrect answers
+    private void showReviewPage() {
+        BorderPane reviewPane = new BorderPane();
+        reviewPane.setPadding(new Insets(20));
+
+        VBox reviewContent = new VBox(20);
+        reviewContent.setAlignment(Pos.CENTER);
+
+        Label reviewLabel = new Label("Incorrect Answers Review");
+        reviewLabel.setFont(new Font("Verdana", 24));
+        reviewLabel.setTextFill(Color.BLUE);
+        reviewContent.getChildren().add(reviewLabel);
+
+        // Display each incorrect answer with color-coded text for correct answers
+        for (IncorrectAnswer incorrectAnswer : incorrectAnswers) {
+            String userAnswer;
+            if (incorrectAnswer.userAnswer == 1) {
+                userAnswer = "Equation 1 was chosen";
+            } else if (incorrectAnswer.userAnswer == 2) {
+                userAnswer = "Equation 2 was chosen";
+            } else {
+                userAnswer = "Both were chosen as equal";
+            }
+
+            // Show the equations
+            Label equationLabel1 = new Label("Equation 1: " + incorrectAnswer.equation1);
+            Label equationLabel2 = new Label("Equation 2: " + incorrectAnswer.equation2);
+            equationLabel1.setFont(new Font("Verdana", 18));
+            equationLabel2.setFont(new Font("Verdana", 18));
+
+            // Show user's incorrect choice in red
+            Label userLabel = new Label("Your answer: " + userAnswer);
+            userLabel.setFont(new Font("Verdana", 16));
+            userLabel.setTextFill(Color.RED);
+
+            // Show correct answer in green
+            Label correctLabel;
+            if (incorrectAnswer.correctAnswer1 > incorrectAnswer.correctAnswer2) {
+                correctLabel = new Label("Correct answer: Equation 1 was greater");
+            } else if (incorrectAnswer.correctAnswer2 > incorrectAnswer.correctAnswer1) {
+                correctLabel = new Label("Correct answer: Equation 2 was greater");
+            } else {
+                correctLabel = new Label("Correct answer: Both were equal");
+            }
+            correctLabel.setFont(new Font("Verdana", 16));
+            correctLabel.setTextFill(Color.GREEN);
+
+            // Add both user and correct answer to the layout
+            VBox questionBox = new VBox(10, equationLabel1, equationLabel2, userLabel, correctLabel);
+            questionBox.setAlignment(Pos.CENTER_LEFT);
+            reviewContent.getChildren().add(questionBox);
+        }
+
+        // Wrap reviewContent inside a ScrollPane to enable scrolling
+        ScrollPane scrollPane = new ScrollPane(reviewContent);
+        scrollPane.setFitToWidth(true); // Ensures the content fits within the width
+        scrollPane.setPadding(new Insets(10));
+
+        // Button to go back to results
+        Button backButton = new Button("Back to Results");
+        backButton.setFont(new Font("Verdana", 18));
+        backButton.setTextFill(Color.WHITE);
+        backButton.setStyle("-fx-background-color: blue;");
+        backButton.setOnAction(e -> endQuiz()); // Back to the results page
+        reviewContent.getChildren().add(backButton);
+
+        reviewPane.setCenter(scrollPane); // Set the scrollable content in the center
+        Scene reviewScene = new Scene(reviewPane, 600, 400);
+        mainStage.setScene(reviewScene);
+    }
+
+    // Define a class to store question and answer details
+    class Question {
+        String question1, question2;
+        int result1, result2;
+
+        public Question(String question1, String question2, int result1, int result2) {
+            this.question1 = question1;
+            this.question2 = question2;
+            this.result1 = result1;
+            this.result2 = result2;
         }
     }
 
-    private void endQuiz() {
-        BorderPane endPane = new BorderPane();
-        endPane.setPadding(new Insets(20));
+    // Define a class to store incorrect answer details for review
+    class IncorrectAnswer {
+        String equation1, equation2;
+        int userAnswer;
+        int correctAnswer1, correctAnswer2;
 
-        VBox endContent = new VBox(20);
-        endContent.setAlignment(Pos.CENTER);
-
-        Label resultLabel = new Label("Quiz Over!");
-        resultLabel.setFont(new Font("Verdana", 24));
-        resultLabel.setTextFill(Color.BLUE);
-        endContent.getChildren().add(resultLabel);
-
-        Label scoreLabel = new Label("You answered " + correctAnswers + " out of " + totalQuestions + " questions correctly.");
-        scoreLabel.setFont(new Font("Verdana", 18));
-        endContent.getChildren().add(scoreLabel);
-
-        Button redoButton = new Button("Redo Quiz");
-        redoButton.setFont(new Font("Verdana", 18));
-        redoButton.setTextFill(Color.WHITE);
-        redoButton.setStyle("-fx-background-color: green;");
-        redoButton.setOnAction(e -> startQuiz());
-        endContent.getChildren().add(redoButton);
-
-        endPane.setCenter(endContent);
-
-        Scene endScene = new Scene(endPane, 600, 400);
-        mainStage.setScene(endScene);
+        public IncorrectAnswer(String equation1, String equation2, int userAnswer, int correctAnswer1, int correctAnswer2) {
+            this.equation1 = equation1;
+            this.equation2 = equation2;
+            this.userAnswer = userAnswer;
+            this.correctAnswer1 = correctAnswer1;
+            this.correctAnswer2 = correctAnswer2;
+        }
     }
 
     public static void main(String[] args) {
