@@ -7,7 +7,9 @@ The Army IQ Test Quiz is a timed, Java-based quiz app that challenges users with
 Features:
 
 Randomized Equations: Each question includes random addition, subtraction, multiplication, or division problems.
+
 60-Second Timer: The quiz ends when the timer runs out, and your score is displayed.
+
 Score Summary: See how many correct answers you provided after the quiz ends.
 
 
