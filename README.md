@@ -24,3 +24,12 @@ Using an IDE
 Download the project and open it in an IDE like IntelliJ or Eclipse.
 Configure JavaFX in your IDE.
 Run the ArmyQuiz.java class.
+
+Set PATH_TO_FX to the download location of this file.
+Note this doesn't have to be in your jdk-22 file.
+https://gluonhq.com/products/javafx/ 
+
+Powershell (x86):
+PS D:\PenTesting\Code> cd D:\PenTesting\Code\
+PS D:\PenTesting\Code> set PATH_TO_FX 'C:\Program Files\Java\jdk-22\javafx-sdk-22.0.2\lib'
+PS D:\PenTesting\Code> java --module-path $PATH_TO_FX --add-modules javafx.controls ArmyQuiz
