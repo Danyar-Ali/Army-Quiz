@@ -1,38 +1,33 @@
-Army IQ Test Quiz
+# Army IQ Test Quiz
 
-Overview
+Army IQ Test Quiz is a timed Java quiz application built with JavaFX. It is meant to mimic one of the IQ tests done in the UK army.
+Players have 60 seconds to compare two arithmetic expressions and choose which one has the greater result.
 
-The Army IQ Test Quiz is a timed, Java-based quiz app that challenges users with random arithmetic problems. You have 60 seconds to determine which of two equations has the greater result.
+## Features
 
-Features:
+Random arithmetic questions (addition, subtraction, multiplication, division)
 
-Randomized Equations: Each question includes random addition, subtraction, multiplication, or division problems.
+60-second countdown timer
 
-60-Second Timer: The quiz ends when the timer runs out, and your score is displayed.
+Final score summary
 
-Score Summary: See how many correct answers you provided after the quiz ends.
-
-
-Requirements:
+## Requirements
 
 Java 8 or later
-JavaFX SDK
 
-How to Run:
+JavaFX SDK (installed separately)
 
-Using an IDE
-Download the project and open it in an IDE like IntelliJ or Eclipse.
-Configure JavaFX in your IDE.
-Run the ArmyQuiz.java class.
+## How to Run
 
-Set PATH_TO_FX to the download location of this file.
-Note this doesn't have to be in your jdk-22 file.
-https://gluonhq.com/products/javafx/ 
+Set JavaFX path: 
 
-Powershell (x86):
+```
+set PATH_TO_FX="C:\Program Files\Java\javafx-sdk-22.0.2\lib"
+```
 
-PS D:\PenTesting\Code> cd D:\PenTesting\Code\
+Run: 
 
-PS D:\PenTesting\Code> set PATH_TO_FX 'C:\Program Files\Java\jdk-22\javafx-sdk-22.0.2\lib'
+```
+java --module-path $PATH_TO_FX --add-modules javafx.controls ArmyQuiz
+```
 
-PS D:\PenTesting\Code> java --module-path $PATH_TO_FX --add-modules javafx.controls ArmyQuiz
